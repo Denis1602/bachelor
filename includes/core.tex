@@ -147,6 +147,117 @@ Vďaka týmto vlastnostiam možno Grafanu využiť na~vytvorenie centralizované
 monitorovacieho rozhrania pre~systémy, v~ktorých sa zhromažďuje väčšie množstvo 
 údajov \cite{grafana_datasource}.
 
+\section{Kontajnerizácia a virtualizácia prostredia}
+Kontajnerizácia je spôsob nasadzovania a~prevádzkovania softvéru, pri~ktorom 
+sa aplikácia spolu so~všetkými svojimi závislosťami balí do~samostatného, 
+izolovaného prostredia nazývaného kontajner. Na~rozdiel od~tradičnej 
+virtualizácie na~úrovni hardvéru kontajnery zdieľajú jadro hostiteľského 
+operačného systému. Táto vlastnosť zabezpečuje nižšiu spotrebu 
+počítačových zdrojov a~vyššiu rýchlosť prevádzky.
+
+Virtualizácia umožňuje vytvárať a~prevádzkovať virtuálne počítače pomocou softvéru 
+nazývaného hypervízor. Tento prístup umožňuje spúšťať niekoľko virtuálnych 
+počítačov na~jednom fyzickom počítači, z~ktorých každý má vlastný operačný systém, 
+vyhradené zdroje a~izolované prostredie na~vykonávanie. Na~rozdiel od~kontajnerizácie 
+umožňuje prevádzkovať viacero virtuálnych počítačov na~jednom fyzickom zariadení, 
+pričom každý virtuálny počítač môže používať iný operačný systém.
+
+Hlavným rozdielom medzi kontajnerizáciou a~virtualizáciou je to, že kontajnerizácia 
+je výhodná najmä pri~rýchlom nasadzovaní aplikácií s~nízkymi nárokmi na~zdroje, 
+zatiaľ čo virtualizácia umožňuje prevádzkovať samostatné operačné systémy 
+a~poskytuje izoláciu na~úrovni celých virtuálnych počítačov.
+
+\subsection{Docker}
+Docker je otvorená platforma na~vývoj, distribúciu a~spúšťanie aplikácií. 
+Umožňuje oddeliť aplikácie od~infraštruktúry, čím sa urýchľuje dodávanie softvéru. 
+Pomocou Dockeru možno spravovať infraštruktúru podobným spôsobom ako aplikácie. 
+Využívaním postupov založených na`Dockeri pri~dodávaní, testovaní a~nasadzovaní 
+kódu možno výrazne skrátiť čas medzi jeho napísaním a~spustením v~produkčnom 
+prostredí \cite{docker}.
+
+\subsubsection*{Základné pojmy:}
+\begin{enumerate}
+  \item \emph{Docker image} (obraz kontajnera): Nemenná šablóna obsahujúca súbory, 
+  knižnice, závislosti a konfiguráciu potrebné na~vytvorenie kontajnera. 
+  Obraz je určený len na~čítanie a~slúži ako základ na~vytvorenie a'spustenie 
+  kontajnera.
+
+  \item \emph{Docker container} (kontajner): Izolovaná inštancia vytvorená na~základe 
+  obrazu kontajnera, v~ktorej sa vykonáva aplikácia. Kontajner môže byť spustený 
+  alebo zastavený.
+
+  \item \emph{Dockerfile}: Textový súbor obsahujúci inštrukcie na~zostavenie obrazu 
+  kontajnera.
+
+  \item \emph{Docker Hub}: Online register obrazov kontajnerov, ktorý umožňuje vyhľadávať, 
+  ukladať a~distribuovať obrazy používané napríklad pri~nasadzovaní aplikácií 
+  ESPHome, Home Assistant a Grafana.
+
+  \item \emph{Docker volume}: Mechanizmus na~ukladanie údajov nezávisle od~životného 
+  cyklu kontajnera. Umožňuje zachovať údaje aj po'odstránení kontajnera, 
+  pokiaľ samotný volume nie je odstránený.
+\end{enumerate}
+
+\begin{lstlisting}[
+caption={Spustenie kontajnera ESPHome príkazom docker run},
+label={lst:docker-run},
+language=bash,
+style=code-listing
+]
+docker run -it -p 6052:6052 -v esphome_data:/config --name myesphome esphome/esphome
+\end{lstlisting}
+
+Význam jednotlivých parametrov príkazu:
+\begin{itemize}
+  \item \verb|run| -- stiahne obraz (ak sa nenachádza v lokálnom úložisku), vytvorí a spustí nový kontajner;
+  \item \verb|-it| (\emph{interactive + tty}) -- zabezpečuje interaktívny režim s výpisom logov do terminálu;
+  \item \verb|-p 6052:6052| -- mapuje port 6052 hostiteľského systému na port 6052 vnútri kontajnera;
+  \item \verb|-v esphome\_data:/config| -- vytvorí alebo pripojí Docker Volume;
+  \item \verb|--name myesphome| -- priradí kontajneru vlastný, zrozumiteľný názov;
+  \item \verb|esphome/esphome| -- názov oficiálneho obrazu ESPHome z registra Docker Hub.
+\end{itemize}
+
+\subsection{Docker Compose}
+Na~definovanie, konfiguráciu a~spúšťanie viacerých kontajnerov (napr. pre aplikácie 
+Home Assistant a~ESPHome) sa používa nástroj Docker \emph{Compose}. Konfigurácia jednotlivých 
+služieb sa definuje v~súbore \verb|docker-compose.yaml|, v~ktorom možno určiť 
+použité obrazy kontajnerov, mapovanie portov a~spôsob ukladania údajov. Príkazom 
+\verb|docker compose up -d| možno vytvoriť a spustiť kontajnery definovaných 
+služieb na pozadí \cite{docker_compose}. 
+
+\Needspace{20\baselineskip}
+\subsubsection*{Príklad konfiguračného súboru Docker Compose:}
+
+\begingroup
+\lstset{
+  caption={Príklad konfiguračného súboru Docker Compose},
+  label={lst:docker-compose},
+  style=code-listing
+}
+\begin{lstlisting}
+services:
+  homeassistant:
+    image: homeassistant/home-assistant:latest
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./homeassistant_data:/config
+
+  esphome:
+    image: esphome/esphome:latest
+    ports:
+      - "6052:6052"
+    volumes:
+      - ./esphome_data:/config
+\end{lstlisting}
+\endgroup
+
+
+
+
+
+\section{Hardvérové komponenty}
+
 
 
 

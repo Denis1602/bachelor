@@ -105,6 +105,7 @@
 \usepackage[compact]{titlesec}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{needspace}
 \usepackage{lmodern}
 \usepackage{changepage}
 \usepackage{xurl}
