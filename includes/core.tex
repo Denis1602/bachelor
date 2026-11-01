@@ -178,8 +178,8 @@ prostredí \cite{docker}.
 \subsubsection*{Základné pojmy:}
 \begin{enumerate}
   \item \emph{Docker image} (obraz kontajnera): Nemenná šablóna obsahujúca súbory, 
-  knižnice, závislosti a konfiguráciu potrebné na~vytvorenie kontajnera. 
-  Obraz je určený len na~čítanie a~slúži ako základ na~vytvorenie a'spustenie 
+  knižnice, závislosti a~konfiguráciu potrebné na~vytvorenie kontajnera. 
+  Obraz je určený len na~čítanie a~slúži ako základ na~vytvorenie a~spustenie 
   kontajnera.
 
   \item \emph{Docker container} (kontajner): Izolovaná inštancia vytvorená na~základe 
@@ -194,7 +194,7 @@ prostredí \cite{docker}.
   ESPHome, Home Assistant a Grafana.
 
   \item \emph{Docker volume}: Mechanizmus na~ukladanie údajov nezávisle od~životného 
-  cyklu kontajnera. Umožňuje zachovať údaje aj po'odstránení kontajnera, 
+  cyklu kontajnera. Umožňuje zachovať údaje aj po~odstránení kontajnera, 
   pokiaľ samotný volume nie je odstránený.
 \end{enumerate}
 
@@ -217,7 +217,7 @@ Význam jednotlivých parametrov príkazu:
   \item \verb|esphome/esphome| -- názov oficiálneho obrazu ESPHome z registra Docker Hub.
 \end{itemize}
 
-\subsection{Docker Compose}
+\subsubsection{Docker Compose}
 Na~definovanie, konfiguráciu a~spúšťanie viacerých kontajnerov (napr. pre aplikácie 
 Home Assistant a~ESPHome) sa používa nástroj Docker \emph{Compose}. Konfigurácia jednotlivých 
 služieb sa definuje v~súbore \verb|docker-compose.yaml|, v~ktorom možno určiť 
@@ -251,12 +251,137 @@ services:
       - ./esphome_data:/config
 \end{lstlisting}
 \endgroup
+\subsection{Kubernetes K8s}
+Kubernetes je open-source platforma určená na~orchestráciu kontajnerov a~automatizáciu 
+ich prevádzky. Poskytuje nástroje na~riadenie kontajnerizovaných aplikácií 
+v~distribuovanom prostredí \cite{kubernetes}. Zatiaľ čo Docker poskytuje nástroje 
+na~vytváranie a~spúšťanie kontajnerov, Kubernetes umožňuje orchestráciu aplikácií 
+naprieč viacerými uzlami klastra. Medzi jeho kľúčové funkcie patrí automatické škálovanie 
+aplikácií a~mechanizmy samoobnovy. V prípade zlyhania kontajnera sa Kubernetes 
+môže pokúsiť o~jeho opätovné spustenie alebo vytvorenie náhradnej inštancie. 
+\subsubsection*{Základné pojmy:}
+\begin{enumerate}
+  \item \emph{Pod} -- najmenšia nasaditeľná jednotka (jeden alebo viac
+  vzájomne prepojených kontajnerov);
+  \item \emph{Node} -- fyzický alebo virtuálny server, na~ktorom sa 
+  reálne spúšťajú Pody;
+  \item \emph{Cluster} -- súbor strojov (nodes), ktoré Kubernetes spravuje 
+  ako jeden celok;
+  \item \emph{Deployment} -- popisuje, koľko identických Podov má bežať, aký obraz 
+  použiť a~ako robiť aktualizácie (konfiguračný súbor \uv{.yaml});
+  \item \emph{Service} -- stabilná adresa pre skupinu Podov;
+  \item \emph{PersistentVolume} -- Kubernetes ekvivalent Docker Volume: uchováva dáta 
+  aj po~zániku Podu.
+\end{enumerate}
 
 
+\begin{table}[ht]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}
+  >{\raggedright\arraybackslash}p{0.22\textwidth}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+@{}}
+  \toprule
+  \textbf{Vlastnosť} & \textbf{Docker Compose} & \textbf{Kubernetes} \\
+  \midrule
+  \textbf{Počet zariadení} & Jeden hostiteľ & Klaster viacerých nodov\\
+  \textbf{Náročnosť nasadenia} &
+    Jednoduchý súbor \verb|docker-compose.yaml| a~rýchle spustenie všetkých služieb &
+    Klaster a~viacero YAML manifestov, napríklad Deployment, Service a~ConfigMap\\
+  \textbf{Škálovanie} &
+    Vhodné pre jednu inštanciu každej služby &
+    Umožňuje jednoducho meniť počet inštancií jednotlivých služieb\\
+  \textbf{Obnova po chybe} &
+    Možno nastaviť v~konfigurácii &
+    Automatický reštart alebo náhrada Podov\\
+  \textbf{Vhodné použitie} &
+    Domáca automatizácia a~laboratórne prototypy &
+    Väčšia infraštruktúra, viacero serverov a~produkčné prostredie\\
+  \bottomrule
+\end{tabularx}
+\caption{Porovnanie Docker Compose a~Kubernetes}
+\end{table}
 
+\subsection{Proxmox VE}
+Proxmox Virtual Environment (Proxmox VE) je open-source platforma na~správu 
+virtualizovaného serverového prostredia, ktorá integruje hypervízor KVM na~plnú 
+virtualizáciu a~technológiu LXC na~kontajnerizáciu na~úrovni operačného systému. 
+Prostredníctvom integrovaného webového rozhrania umožňuje centralizovanú správu 
+virtuálnych strojov, úložiska, sieťových nastavení a~klastrovej infraštruktúry. 
+Pri vhodnej konfigurácii klastra podporuje aj zabezpečenie vysokej dostupnosti 
+služieb \cite{proxmox}. Na~rozdiel od~Dockeru, ktorý sa zameriava predovšetkým 
+na~vytváranie a~spúšťanie aplikačných kontajnerov, Proxmox VE umožňuje spravovať 
+virtuálne stroje a~systémové kontajnery na~úrovni serverovej infraštruktúry.
 
+\subsubsection*{Základné pojmy:}
+\begin{enumerate}
+    \item \emph{Hypervízor} -- softvérová vrstva umožňujúca
+    virtualizáciu hardvérových zdrojov servera a ich prideľovanie
+    jednotlivým virtuálnym prostrediam;
+
+    \item \emph{Virtuálny stroj} (Virtual Machine -- VM) --
+    virtualizované prostredie s vlastným operačným systémom,
+    ktorému sa prideľujú virtuálne procesory, operačná pamäť (RAM),
+    virtuálny disk a sieťové rozhranie;
+
+    \item \emph{LXC kontajner} (Linux Container) --
+    izolované prostredie na úrovni operačného systému, ktoré
+    zdieľa jadro hostiteľského systému a umožňuje spúšťať
+    aplikácie v izolovanom linuxovom prostredí;
+
+    \item \emph{Linux Bridge} -- virtuálny sieťový most
+    prepájajúci virtuálne stroje a LXC kontajnery s fyzickou
+    sieťou servera a umožňujúci ich komunikáciu v lokálnej sieti;
+
+    \item \emph{ISO obraz a šablóna kontajnera} -- ISO obraz obsahuje inštalačné 
+    médium operačného systému používané pri jeho inštalácii do
+    virtuálneho stroja, zatiaľ čo šablóna kontajnera obsahuje
+    základný súborový systém potrebný na vytvorenie LXC kontajnera;
+
+    \item \emph{Snímka stavu} (Snapshot) -- záznam stavu
+    virtuálneho stroja alebo kontajnera v konkrétnom čase,
+    ktorý umožňuje návrat k predchádzajúcemu stavu diskov
+    a konfigurácie.
+\end{enumerate}
+
+\begin{table}[ht]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}
+  >{\raggedright\arraybackslash}p{0.22\textwidth}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+@{}}
+  \toprule
+  \textbf{Vlastnosť} & \textbf{Docker Compose} & \textbf{Proxmox VE} \\
+  \midrule
+  \textbf{Úroveň virtualizácie} & 
+    Virtualizácia na úrovni aplikácií (kontajnerizácia); zdieľa jadro hostiteľa & 
+    Plná virtualizácia (KVM hypervizor) alebo systémové kontajnery (LXC) \\
+  \textbf{Systémové nároky} & 
+    Minimálne; veľmi nízka spotreba RAM a CPU, ideálne pre malé zariadenia & 
+    Vyššie; vyžaduje alokáciu zdrojov pre hypervizor a celé operačné systémy \\
+  \textbf{Rýchlosť spúšťania} & 
+    Okamžité spustenie služieb (v ráde sekúnd) & 
+    Pomalšie spúšťanie (vyžaduje štart celého virtuálneho stroja) \\
+  \textbf{Správa a konfigurácia} & 
+    Jednoduchý deklaratívny súbor \verb|docker-compose.yaml| pre celú aplikáciu & 
+    Vyžaduje správu celého servera, webové rozhranie, ISO obrazy a sieťové zväzky \\
+  \textbf{Vhodné použitie} & 
+    Rýchly vývoj, microservices a ľahké aplikácie domácej automatizácie & 
+    Komplexná serverová infraštruktúra, izolácia rôznych OS a spájanie serverov \\
+  \bottomrule
+\end{tabularx}
+\caption{Porovnanie Docker Compose a Proxmox VE}
+\label{tab:docker_proxmox_comparison}
+\end{table}
 
 \section{Hardvérové komponenty}
+
 
 
 
